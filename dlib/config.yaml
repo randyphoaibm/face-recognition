@@ -1,0 +1,8 @@
+name: python38
+channels:
+  - conda-forge
+dependencies:
+  - libblas
+  - libcblas
+  - liblapack
+  - python_abi
