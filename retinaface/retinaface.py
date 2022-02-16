@@ -611,7 +611,7 @@ def cpu_nms(dets, threshold):
     return keep
 
 
-def detect_face(wml_client, deployment_uid, image):
+def detect_face(wml_client, deployment_uid, image_path):
     threshold = 0.9
     nms_threshold = 0.4
     decay4 = 0.5
@@ -630,15 +630,15 @@ def detect_face(wml_client, deployment_uid, image):
     scores_list = []
     landmarks_list = []
 
-    img = cv2.imread(image)
+    img = cv2.imread(image_path)
     im_tensor, im_info, im_scale = preprocess_image(img=img, allow_upscaling=True)
     scoring_payload = {
-        wml_client.deployments.ScoringMetaNames.INPUT_DATA : [
+        "input_data" : [
             {"values": im_tensor.tolist()}
         ]
     }
-    net_out = wml_client.deployments.score(deployment_uid, scoring_payload)
-    net_out = [np.array(x["values"]) for x in net_out["predictions"]]
+    out = wml_client.deployments.score(deployment_uid, scoring_payload)
+    out = [np.array(x["values"]) for x in out["predictions"]]
 
     sym_idx = 0
 
