@@ -5,7 +5,7 @@ from tensorflow.keras.layers import Add, BatchNormalization, Conv2D, Input, MaxP
 from tensorflow.keras.models import Model
 
 
-def build_model():
+def build_model(model_path):
 
     data = Input(dtype=tf.float32, shape=(None, None, 3), name="data")
     bn_data = BatchNormalization(epsilon=1.9999999494757503e-05, name="bn_data", trainable=False)(data)
@@ -385,7 +385,7 @@ def build_model():
         ],
     )
 
-    model.load_weights("data/retinaface_model/retinaface.h5")
+    model.load_weights(model_path)
 
     return model
 
