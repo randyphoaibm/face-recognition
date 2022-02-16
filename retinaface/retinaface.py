@@ -644,10 +644,10 @@ def detect_face(wml_client, deployment_uid, image_path):
 
     for _idx, s in enumerate(_feat_stride_fpn):
         _key = "stride%s" % s
-        scores = net_out[sym_idx]
+        scores = out[sym_idx]
         scores = scores[:, :, :, _num_anchors["stride%s" % s] :]
 
-        bbox_deltas = net_out[sym_idx + 1]
+        bbox_deltas = out[sym_idx + 1]
         height, width = bbox_deltas.shape[1], bbox_deltas.shape[2]
 
         A = _num_anchors["stride%s" % s]
@@ -681,7 +681,7 @@ def detect_face(wml_client, deployment_uid, image_path):
         proposals_list.append(proposals)
         scores_list.append(scores)
 
-        landmark_deltas = net_out[sym_idx + 2]
+        landmark_deltas = out[sym_idx + 2]
         landmark_pred_len = landmark_deltas.shape[3] // A
         landmark_deltas = landmark_deltas.reshape((-1, 5, landmark_pred_len // 5))
         landmarks = landmark_pred(anchors, landmark_deltas)
