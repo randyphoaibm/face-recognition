@@ -36,7 +36,7 @@ def deploy_model(wml_client, model, model_name, model_deployment_name):
     deployment_uid = wml_client.deployments.get_uid(deployment_details)
 
     return deployment_uid
-    
+
 
 def deploy_function(wml_client, function, function_name, function_deployment_name, software_spec_uid):
     for x in wml_client.deployments.get_details()["resources"]:
@@ -97,8 +97,48 @@ def upload_lib(wml_client, name, file_path):
     asset_uid = wml_client.data_assets.get_uid(asset_details)
     return asset_uid
 
-    
+
 def get_asset_uid(wml_client, asset_name):
     for x in wml_client.data_assets.get_details()["resources"]:
         if x["metadata"]["name"] == asset_name:
             return x["metadata"]["asset_id"]
+
+
+def deploy_dlib(wml_client, wml_credentials, SPACE_ID, conda_yaml, lib_path):
+    SOFTWARE_SPEC_NAME = "dlib"
+    software_spec_uid = create_software_spec(wml_client=wml_client, software_spec_name=SOFTWARE_SPEC_NAME, conda_yaml=conda_yaml)
+    lib_uid = upload_lib(wml_client=wml_client, name="dlib_lib", file_path=lib_path)
+    software_spec_uid
+
+    FUNCTION_NAME = "dlib Function"
+    FUNCTION_DEPLOYMENT_NAME = "dlib Function Deployment"
+
+    params = {
+        "wml_credentials": wml_credentials,
+        "lib_uid": lib_uid,
+        "SPACE_ID": SPACE_ID,
+    }
+
+    def func(params=params):
+        import numpy as np
+        import ibm_watson_machine_learning
+
+        wml_client = ibm_watson_machine_learning.APIClient(params["wml_credentials"])
+        wml_client.set.default_space(params["SPACE_ID"])
+        wml_client.data_assets.download(params["lib_uid"], "_dlib_pybind11.cpython-38-x86_64-linux-gnu.so")
+        import _dlib_pybind11 as dlib
+
+        detector = dlib.get_frontal_face_detector()
+
+        def score(payload):
+            img = payload["input_data"][0]["values"]
+            detections = detector(np.array(img, dtype=np.uint8))
+            detections = [(x.left(), x.top(), x.right(), x.bottom()) for x in detections]
+            return {"predictions": [{"values": detections,}]}
+
+        return score
+
+    function_deployment_uid = deploy_function(
+        wml_client=wml_client, function=func, function_name=FUNCTION_NAME, function_deployment_name=FUNCTION_DEPLOYMENT_NAME, software_spec_uid=software_spec_uid
+    )
+
