@@ -11,6 +11,7 @@
 # wml_client.spaces.list(limit=10)
 # wml_client.set.default_space(SPACE_ID)
 
+import ibm_watson_machine_learning
 
 def deploy_model(wml_client, model, model_name, model_deployment_name):
     for x in wml_client.deployments.get_details()["resources"]:
@@ -104,7 +105,10 @@ def get_asset_uid(wml_client, asset_name):
             return x["metadata"]["asset_id"]
 
 
-def deploy_dlib(wml_client, wml_credentials, SPACE_ID, conda_yaml, lib_path):
+def deploy_dlib(wml_credentials, SPACE_ID, conda_yaml, lib_path):
+    wml_client = ibm_watson_machine_learning.APIClient(wml_credentials)
+    wml_client.set.default_space(SPACE_ID)
+
     SOFTWARE_SPEC_NAME = "dlib"
     software_spec_uid = create_software_spec(wml_client=wml_client, software_spec_name=SOFTWARE_SPEC_NAME, conda_yaml=conda_yaml)
     lib_uid = upload_lib(wml_client=wml_client, name="dlib_lib", file_path=lib_path)
