@@ -142,3 +142,4 @@ def deploy_dlib(wml_client, wml_credentials, SPACE_ID, conda_yaml, lib_path):
         wml_client=wml_client, function=func, function_name=FUNCTION_NAME, function_deployment_name=FUNCTION_DEPLOYMENT_NAME, software_spec_uid=software_spec_uid
     )
 
+    return function_deployment_uid
